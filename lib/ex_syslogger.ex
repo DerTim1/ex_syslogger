@@ -81,7 +81,8 @@ defmodule ExSyslogger do
     metadata: [:module, :line, :function],
     ident: "MyApplication",
     facility: :local1,
-    option: :pid
+    option: :pid,
+    single_node: true
   ```
 
 
@@ -94,6 +95,7 @@ defmodule ExSyslogger do
   * __ident__ (optional): A string that's prepended to every message, and is typically set to the app name. It defaults to `"Elixir"`
   * __facility__ (optional): syslog facility to be used. It defaults to `:local0`. More documentation on [erlang-syslog](https://github.com/Vagabond/erlang-syslog/#syslogopenident-logopt-facility---ok-port)
   * __option__ (optional): syslog option to be used. It defaults to `:ndelay`. More documentation on [erlang-syslog](https://github.com/Vagabond/erlang-syslog/#syslogopenident-logopt-facility---ok-port)
+  * __single_node__ (optional): If `true`, all messages from all nodes will be logged, otherwise only from processes of the same group_leader. It defaults to `false`
 
   ## Custom Formatters
   ExSyslogger by default uses [Logger.Formatter](http://elixir-lang.org/docs/stable/logger/Logger.Formatter.html). However, it comes with a [JSON formatter](http://hexdocs.pm/exsyslog/1.0.1) that formats a given log entry to a JSON string. __NOTE__: `ExSyslogger.JsonFormatter` can be use as an example if one wants to build his own formatter.
@@ -202,8 +204,9 @@ defmodule ExSyslogger do
 
   Ignores messages where the group leader is in a different node.
   """
-  def handle_event({_level, gl, _event}, config) when node(gl) != node() do
-    {:ok, config}
+  def handle_event({_level, gl, _event}, %{config: %{single_node: single_node}} = state)
+      when not single_node and node(gl) != node() do
+    {:ok, state}
   end
 
   def handle_event(
@@ -242,6 +245,7 @@ defmodule ExSyslogger do
     facility = Keyword.get(configs, :facility, :local0)
     option = Keyword.get(configs, :option, :ndelay)
     ident = Keyword.get(configs, :ident, "Elixir") |> String.to_charlist()
+    single_node = Keyword.get(configs, :single_node, false)
 
     formatter = Keyword.get(configs, :formatter, Logger.Formatter)
     format_str = Keyword.get(configs, :format, @default_pattern)
@@ -254,7 +258,8 @@ defmodule ExSyslogger do
       metadata: metadata,
       ident: ident,
       facility: facility,
-      option: option
+      option: option,
+      single_node: single_node
     }
   end
 
