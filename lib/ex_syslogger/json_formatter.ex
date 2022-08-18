@@ -68,9 +68,9 @@ defmodule ExSyslogger.JsonFormatter do
       |> to_string()
 
     log = %{level: level, message: msg_str, node: node()}
+    metadata = Map.new(metadata, fn {key, value} -> {key, pre_encode(value)} end)
 
-    metadata = Enum.reduce(metadata, log, &add_to_log/2)
-    {:ok, log_json} = apply(Jason, :encode, [metadata])
+    {:ok, log_json} = apply(Jason, :encode, [Map.merge(metadata, log)])
 
     log_json
   end
@@ -79,39 +79,33 @@ defmodule ExSyslogger.JsonFormatter do
   #
   # Internal functions
 
-  defp add_to_log({_, nil}, log) do
-    log
+  # traverse data and stringify special Elixir/Erlang terms
+  defp pre_encode(it) when is_pid(it), do: inspect(it)
+  defp pre_encode(it) when is_integer(it), do: inspect(it)
+  defp pre_encode(it) when is_function(it), do: inspect(it)
+  defp pre_encode(it) when is_list(it), do: Enum.map(it, &pre_encode/1)
+  defp pre_encode(it) when is_tuple(it), do: pre_encode(Tuple.to_list(it))
+
+  defp pre_encode(%module{} = it) do
+    try do
+      :ok = Protocol.assert_impl!(Jason.Encoder, module)
+      it
+    rescue
+      ArgumentError -> pre_encode(Map.from_struct(it))
+    end
   end
 
-  defp add_to_log({:initial_call, {mod, fun, arity}}, log)
-       when is_atom(mod) and is_atom(fun) and is_integer(arity) do
-    Map.put(log, :initial_call, Exception.format_mfa(mod, fun, arity))
+  defp pre_encode(it) when is_map(it),
+    do: Enum.into(it, %{}, fn {k, v} -> {pre_encode(k), pre_encode(v)} end)
+
+  defp pre_encode(it) when is_binary(it) do
+    it
+    |> String.valid?()
+    |> case do
+      true -> it
+      false -> inspect(it)
+    end
   end
 
-  defp add_to_log({key, pid}, log) when is_pid(pid) do
-    Map.put(log, key, List.to_string(:erlang.pid_to_list(pid)))
-  end
-
-  defp add_to_log({key, ref}, log) when is_reference(ref) do
-    '#Ref' ++ rest = :erlang.ref_to_list(ref)
-    Map.put(log, key, List.to_string(rest))
-  end
-
-  defp add_to_log({key, atom}, log) when is_atom(atom) do
-    binary =
-      case Atom.to_string(atom) do
-        "Elixir." <> rest -> rest
-        binary -> binary
-      end
-
-    Map.put(log, key, binary)
-  end
-
-  defp add_to_log({key, value}, log) when is_binary(value) do
-    Map.put(log, key, value)
-  end
-
-  defp add_to_log({key, value}, log) do
-    Map.put(log, key, inspect(value))
-  end
+  defp pre_encode(it), do: it
 end

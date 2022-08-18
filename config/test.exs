@@ -7,10 +7,10 @@ config :logger,
   discard_threshold_for_error_logger: 500,
   compile_time_purge_matching: [[level_lower_than: :debug]],
   backends: [
-            {ExSyslogger, :ex_syslogger_error},
-            {ExSyslogger, :ex_syslogger_debug},
-            {ExSyslogger, :ex_syslogger_json}
-            ]
+    {ExSyslogger, :ex_syslogger_error},
+    {ExSyslogger, :ex_syslogger_debug},
+    {ExSyslogger, :ex_syslogger_json}
+  ]
 
 config :logger, :console,
   level: :error,
@@ -36,7 +36,7 @@ config :logger, :ex_syslogger_json,
   level: :debug,
   format: "$message",
   formatter: ExSyslogger.JsonFormatter,
-  metadata: [:module, :line, :function],
+  metadata: :all,
   ident: "MyApplication JSON",
   facility: :local1,
   option: :pid
