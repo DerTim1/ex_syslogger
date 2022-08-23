@@ -13,10 +13,10 @@ defmodule ExSyslogger.JsonFormatterTest do
                :error,
                "Hey",
                DateTime.utc_now(),
-               [my_date: ~D[2022-07-07], my_time: ~U[2022-07-07 12:00:05Z]],
+               [my_date: ~D[2022-07-07], my_time: ~U[2022-07-07 12:00:05Z], int: 4, float: 4.5],
                :all
              ) ==
-               "{\"level\":\"error\",\"message\":\"Hey\\n\",\"my_date\":\"2022-07-07\",\"my_time\":\"2022-07-07T12:00:05Z\",\"node\":\"nonode@nohost\"}"
+               "{\"float\":4.5,\"int\":4,\"level\":\"error\",\"message\":\"Hey\\n\",\"my_date\":\"2022-07-07\",\"my_time\":\"2022-07-07T12:00:05Z\",\"node\":\"nonode@nohost\"}"
     end
 
     test "with nested metadata" do
@@ -28,7 +28,7 @@ defmodule ExSyslogger.JsonFormatterTest do
                [my_map: %{a: ~D[2022-07-07], b: ~U[2022-07-07 12:00:05Z]}, list: [1, 2, 3]],
                :all
              ) ==
-               "{\"level\":\"error\",\"list\":[\"1\",\"2\",\"3\"],\"message\":\"Hey\\n\",\"my_map\":{\"a\":\"2022-07-07\",\"b\":\"2022-07-07T12:00:05Z\"},\"node\":\"nonode@nohost\"}"
+               "{\"level\":\"error\",\"list\":[1,2,3],\"message\":\"Hey\\n\",\"my_map\":{\"a\":\"2022-07-07\",\"b\":\"2022-07-07T12:00:05Z\"},\"node\":\"nonode@nohost\"}"
     end
   end
 end
