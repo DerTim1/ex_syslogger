@@ -30,5 +30,19 @@ defmodule ExSyslogger.JsonFormatterTest do
              ) ==
                "{\"level\":\"error\",\"list\":[1,2,3],\"message\":\"Hey\\n\",\"my_map\":{\"a\":\"2022-07-07\",\"b\":\"2022-07-07T12:00:05Z\"},\"node\":\"nonode@nohost\"}"
     end
+
+    test "with reference in metadata" do
+      ref = :erlang.make_ref()
+
+      assert JsonFormatter.format(
+               @format,
+               :error,
+               "Hey",
+               DateTime.utc_now(),
+               [my_reference: ref],
+               :all
+             ) ==
+               "{\"level\":\"error\",\"message\":\"Hey\\n\",\"my_reference\":\"#{inspect(ref)}\",\"node\":\"nonode@nohost\"}"
+    end
   end
 end
