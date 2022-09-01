@@ -44,5 +44,19 @@ defmodule ExSyslogger.JsonFormatterTest do
              ) ==
                "{\"level\":\"error\",\"message\":\"Hey\\n\",\"my_reference\":\"#{inspect(ref)}\",\"node\":\"nonode@nohost\"}"
     end
+
+    test "with port in metadata" do
+      port = Port.list() |> hd()
+
+      assert JsonFormatter.format(
+               @format,
+               :error,
+               "Hey",
+               DateTime.utc_now(),
+               [my_port: port],
+               :all
+             ) ==
+               "{\"level\":\"error\",\"message\":\"Hey\\n\",\"my_port\":\"#{inspect(port)}\",\"node\":\"nonode@nohost\"}"
+    end
   end
 end

@@ -83,6 +83,7 @@ defmodule ExSyslogger.JsonFormatter do
   defp pre_encode(it) when is_pid(it), do: inspect(it)
   defp pre_encode(it) when is_function(it), do: inspect(it)
   defp pre_encode(it) when is_reference(it), do: inspect(it)
+  defp pre_encode(it) when is_port(it), do: inspect(it)
   defp pre_encode(it) when is_list(it), do: Enum.map(it, &pre_encode/1)
   defp pre_encode(it) when is_tuple(it), do: pre_encode(Tuple.to_list(it))
 
