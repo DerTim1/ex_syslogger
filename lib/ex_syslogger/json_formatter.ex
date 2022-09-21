@@ -85,7 +85,7 @@ defmodule ExSyslogger.JsonFormatter do
   defp pre_encode(it) when is_reference(it), do: inspect(it)
   defp pre_encode(it) when is_port(it), do: inspect(it)
   defp pre_encode(it) when is_list(it), do: Enum.map(it, &pre_encode/1)
-  defp pre_encode(it) when is_tuple(it), do: pre_encode(Tuple.to_list(it))
+  defp pre_encode(it) when is_tuple(it), do: pre_encode(to_counted_map(it))
 
   defp pre_encode(%module{} = it) do
     try do
@@ -109,4 +109,15 @@ defmodule ExSyslogger.JsonFormatter do
   end
 
   defp pre_encode(it), do: it
+
+  @spec to_counted_map(tuple()) :: map()
+  defp to_counted_map({}), do: %{}
+
+  defp to_counted_map(t) do
+    size = tuple_size(t)
+    values = Tuple.to_list(t)
+    keys = Enum.to_list(1..size)
+
+    Enum.zip(keys, values) |> Map.new()
+  end
 end

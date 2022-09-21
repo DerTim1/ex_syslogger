@@ -58,5 +58,19 @@ defmodule ExSyslogger.JsonFormatterTest do
              ) ==
                "{\"level\":\"error\",\"message\":\"Hey\\n\",\"my_port\":\"#{inspect(port)}\",\"node\":\"nonode@nohost\"}"
     end
+
+    test "with mixed tuple" do
+      tuple = {4, "string", 5}
+
+      assert JsonFormatter.format(
+               @format,
+               :error,
+               "Hey",
+               DateTime.utc_now(),
+               [my_tuple: tuple],
+               :all
+             ) ==
+               ~s({"level":"error","message":"Hey\\n","my_tuple":{"1":4,"2":"string","3":5},"node":"nonode@nohost"})
+    end
   end
 end
