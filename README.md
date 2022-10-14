@@ -13,6 +13,10 @@ ExSyslogger is custom backend for `Elixir Logger` that logs to syslog by wrappin
 
 This project is a fork of [exsyslog](https://github.com/22cans/exsyslog).
 
+## Netzlive Fork
+
+Build with `mix hex.build` and publish tar-file to Netzlive hexpm by yourself.
+
 ## Requirements
 * Elixir ~> 1.3
 
