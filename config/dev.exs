@@ -7,19 +7,19 @@ config :logger,
   discard_threshold_for_error_logger: 500,
   compile_time_purge_matching: [[level_lower_than: :debug]],
   backends: [
-            {ExSyslogger, :ex_syslogger_error},
-            {ExSyslogger, :ex_syslogger_debug},
-            {ExSyslogger, :ex_syslogger_json}
-            ]
+    {ExSyslogger, :ex_syslogger_error},
+    {ExSyslogger, :ex_syslogger_debug},
+    {ExSyslogger, :ex_syslogger_json}
+  ]
 
 config :logger, :console,
   level: :error,
-  format: "$date $time [$level] $levelpad$node $metadata $message\n",
+  format: "$date $time [$level] $node $metadata $message\n",
   metadata: [:module, :line, :function]
 
 config :logger, :ex_syslogger_error,
   level: :error,
-  format: "$date $time [$level] $levelpad$node $metadata $message",
+  format: "$date $time [$level] $node $metadata $message",
   metadata: [:module, :line, :function],
   ident: "MyApplication",
   facility: :local0,

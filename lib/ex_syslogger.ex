@@ -61,7 +61,7 @@ defmodule ExSyslogger do
   ```
   config :logger, :ex_syslogger_error,
     level: :error,
-    format: "$date $time [$level] $levelpad$node $metadata $message",
+    format: "$date $time [$level] $node $metadata $message",
     metadata: [:module, :line, :function],
     ident: "MyApplication",
     facility: :local0,
@@ -89,7 +89,7 @@ defmodule ExSyslogger do
   ### Backend configuration properties
 
   * __level__ (optional): the logging level. It defaults to `:info`
-  * __format__ (optional): Same as `:console` backend ([Logger.Formatter](http://elixir-lang.org/docs/stable/logger/)). It defaults to `"\n$date $time [$level] $levelpad$node $metadata $message\n"`
+  * __format__ (optional): Same as `:console` backend ([Logger.Formatter](http://elixir-lang.org/docs/stable/logger/)). It defaults to `"\n$date $time [$level] $node $metadata $message\n"`
   * __formatter__ (optional): Formatter that will be used to format the log. It default to Logger.Formatter
   * __metadata__ (optional): Same as `:console` backend [Logger.Formatter](http://elixir-lang.org/docs/stable/logger/). It defaults to `[]`
   * __ident__ (optional): A string that's prepended to every message, and is typically set to the app name. It defaults to `"Elixir"`
@@ -163,7 +163,7 @@ defmodule ExSyslogger do
 
   @behaviour :gen_event
 
-  @default_pattern "$date $time [$level] $levelpad$node $metadata $message\n"
+  @default_pattern "$date $time [$level] $node $metadata $message\n"
 
   @doc false
   def init({__MODULE__, name}) do
@@ -214,6 +214,7 @@ defmodule ExSyslogger do
         %{log: log, config: config} = state
       ) do
     min_level = config.level
+    level = level_rewrite(level)
 
     if is_nil(min_level) or Logger.compare_levels(level, min_level) != :lt do
       priority = level_to_priority(level)
@@ -229,6 +230,9 @@ defmodule ExSyslogger do
   ##############################################################################
   #
   # Internal functions
+
+  defp level_rewrite(:warn), do: :warning
+  defp level_rewrite(others), do: others
 
   defp level_to_priority(:debug), do: :debug
   defp level_to_priority(:info), do: :info
