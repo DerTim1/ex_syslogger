@@ -1,7 +1,7 @@
 defmodule ExSyslogger.Mixfile do
   use Mix.Project
 
-  @version "2.0.0-netzlive1.1"
+  @version "2.0.0-netzlive1.2"
 
   def project do
     [
@@ -14,7 +14,9 @@ defmodule ExSyslogger.Mixfile do
       package: package(),
       deps: deps(),
       docs: [source_ref: "#{@version}", main: "ExSyslogger"],
-      source_url: "https://github.com/slashmili/ex_syslogger"
+      source_url: "https://github.com/slashmili/ex_syslogger",
+      # NOTE Following needed for Elixir <= 1.14
+      xref: [exclude: [Logger.Formatter, Logger]]
     ]
   end
 

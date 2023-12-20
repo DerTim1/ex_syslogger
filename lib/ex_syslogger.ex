@@ -236,6 +236,7 @@ defmodule ExSyslogger do
 
   defp level_to_priority(:debug), do: :debug
   defp level_to_priority(:info), do: :info
+  defp level_to_priority(:warning), do: :warning
   defp level_to_priority(:warn), do: :warning
   defp level_to_priority(:error), do: :err
 
